@@ -4,12 +4,13 @@ use strict;
 use warnings;
 use IO::Socket::INET;
 
-my $com = shift;
-my $byte;
-my $items;
-my $counter;
-my $classid;
-my $addr;
+require './util.pl';
+
+
+$host = shift | 'localhost:11211';
+
+
+
 if ($com eq 'set') {
     $byte = shift;
     $items = shift || 1;
