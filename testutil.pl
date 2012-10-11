@@ -1,19 +1,9 @@
-#!/usr/bin/perl
+l#!/usr/bin/perl
 
 use strict;
 use warnings;
 use IO::Socket::INET;
 
-my $
-
-my $byte = 1;
-my $items;
-my $clsid;
-my $host;
-
-# get_socket
-### param1: Host Address
-### return: Socket
 sub get_socket {
     my $host = $_[0];
     my $sock = IO::Socket::INET->new(PeerAddr => $host,
@@ -22,12 +12,10 @@ sub get_socket {
 }
 
 sub comm_set {
-    my $sock = $_[0];
-    my $key = $_[1];
-    my $byte = $_[2];
+    my ($sock, $key, $byte, $expire) = @_;
     my $value = 'a' x $byte;
-    
-    print $sock "set $key 0 0 $byte\r\n$value\r\n";
+
+    print $sock "set $key 0 $expire $byte\r\n$value\r\n";
     while (<$sock>) {
         last if (/^STORED/);
     }
@@ -35,10 +23,8 @@ sub comm_set {
 }
 
 sub comm_del {
-    my $sock = $_[0];
-    my $clsid = $_[1];
-    my $items = $_[2];
-    
+    my ($sock, $clsid, $items) = @_;
+
     my @keys;
     print $sock "stats cachedump $clsid $items\r\n";
     my $i = 0;
@@ -59,7 +45,9 @@ sub comm_del {
     return 1;
 }
 
-sub comm_rand {
-    my $sock = $_[0];
-    my $
-}
+
+
+# sub comm_rand {
+#     my $sock = $_[0];
+#     my $
+# }
