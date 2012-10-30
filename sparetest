@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+require "./util.pl";
+
+
+my $host = "172.28.32.131:11211";
+my $sock = &getSocket($host);
+
+die "Could not connect to $host\n" unless $sock;
+
+&commFlushAll($sock);
+
+print 'Setting...\n';
+
+my $key_prefix = 's';
+my $size = 50;
+for my $n (1..200) {
+    my $key = ($key_prefix).($n);
+    &commSet($sock, $key, $size, 0);
+    print $size;
+    $size *= 1.25;
+}
+
+print 'Testing...\n';
+
+$key_prefix = 'k';
+for my $m (1..1000000) {
+    my $key = ($key_prefix).($m);
+    &commSet($sock, $key, 10, 0);
+}
+
+__END__

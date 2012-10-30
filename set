@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+require './util.pl';
+
+my $key = shift;
+my $byte = shift || 1;
+my $expire = shift || 0;
+
+die 'Usage: set <key> <byte> [expire]' unless $key;
+
+my $host = '172.28.32.131:11211';
+
+my $sock = &getSocket($host);
+
+&commSet($sock, $key, $byte, $expire);
+
+__END__
