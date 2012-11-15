@@ -6,8 +6,9 @@ use warnings;
 require "./util.pl";
 
 
-my $host = "172.28.32.130:11211";
-my $sock = &getSocket($host);
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
 
 die "Could not connect to $host\n" unless $sock;
 
