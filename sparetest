@@ -14,7 +14,7 @@ die "Could not connect to $host\n" unless $sock;
 
 &commFlushAll($sock);
 
-print 'Setting...\n';
+print "Setting...\n";
 
 my $key_prefix = 's';
 my $size = 30;
@@ -25,7 +25,7 @@ for my $n (1..200) {
     $size = int($size * 1.25);
 }
 
-print 'Testing...\n';
+print "Testing...\n";
 
 $key_prefix = 'k';
 for my $m (1..1000000) {
