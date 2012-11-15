@@ -1,4 +1,4 @@
-l#!/usr/bin/perl
+#!/usr/bin/perl
 
 use strict;
 use warnings;
@@ -35,6 +35,10 @@ sub commSet {
     print $sock "set $key 0 $expire $byte\r\n$value\r\n";
     while (<$sock>) {
         last if (/^STORED/);
+	if (/^SERVER_ERROR (.+)/) {
+	    print "Set error: $1\n";
+	    return 0;
+	}
     }
     return 1;
 }
@@ -64,7 +68,7 @@ sub commDel {
 
 sub commFlushAll {
     my ($sock) = @_;
-    print $sock 'flush_all\r\n';
+    print $sock "flush_all\r\n";
     return 1;
 }
 
@@ -72,3 +76,5 @@ sub commFlushAll {
 #     my $sock = $_[0];
 #     my $
 # }
+
+1;
