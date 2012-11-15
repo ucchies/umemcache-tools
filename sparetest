@@ -6,7 +6,7 @@ use warnings;
 require "./util.pl";
 
 
-my $host = "172.28.32.131:11211";
+my $host = "172.28.32.130:11211";
 my $sock = &getSocket($host);
 
 die "Could not connect to $host\n" unless $sock;
@@ -16,12 +16,12 @@ die "Could not connect to $host\n" unless $sock;
 print 'Setting...\n';
 
 my $key_prefix = 's';
-my $size = 50;
+my $size = 30;
 for my $n (1..200) {
     my $key = ($key_prefix).($n);
-    &commSet($sock, $key, $size, 0);
-    print $size;
-    $size *= 1.25;
+    my $res = &commSet($sock, $key, $size, 0);
+    last if ($res == 0);
+    $size = int($size * 1.25);
 }
 
 print 'Testing...\n';
