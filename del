@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+require "./util.pl";
+
+my $clsid = shift|| "1";
+my $items = shift|| "10000";
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
+
+die "Could not connect to $host\n" unless $sock;
+
+print "Deleting...\n";
+
+&commDel($sock, $clsid, $items);
+
+__END__

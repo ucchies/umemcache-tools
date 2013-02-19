@@ -3,6 +3,7 @@
 use strict;
 use warnings;
 use IO::Socket::INET;
+#use Data::Dumper;
 
 sub getSocket {
     my $host = $_[0];
@@ -14,19 +15,44 @@ sub getSocket {
 sub getStatus {
     my ($sock) = @_;
     
-    my (%items, $maxid);
+    my (%classes, $maxid);
 
     print $sock "stats slabs\r\n";
     while (<$sock>) {
 	last if /^END/;
 	if (/^STAT (\d+):(\w+) (\d+)/) {
-	    $items{$1}{$2} = $3;
+	    $classes{$1}{$2} = $3;
 	    $maxid = $1;
 	}
     }
-    my @status = (%items, $maxid);
-    return @status;
+    return ($maxid, %classes);
 }
+
+sub getAllStatus {
+    my ($sock) = @_;
+    
+    my (%classes, $maxid);
+
+    print $sock "stats items\r\n";
+    while (<$sock>) {
+	last if /^END/;
+	if (/^STAT items:(\d+):(\w+) (\d+)/) {
+	    $classes{$1}{$2} = $3;
+	    $maxid = $1;
+	}
+    }
+    print $sock "stats slabs\r\n";
+    while (<$sock>) {
+	last if /^END/;
+	if (/^STAT (\d+):(\w+) (\d+)/) {
+	    $classes{$1}{$2} = $3;
+	}
+    }
+
+
+    return ($maxid, %classes);
+}
+
 
 sub commSet {
     my ($sock, $key, $byte, $expire) = @_;
@@ -38,6 +64,28 @@ sub commSet {
 	if (/^SERVER_ERROR (.+)/) {
 	    print "Set error: $1\n";
 	    return 0;
+	}
+    }
+    return 1;
+}
+
+sub commDelByKey {
+    my ($sock, $key) = @_;
+    
+    print $sock "delete $key\r\n";
+    while (<$sock>) {
+	last if /^DELETED/;
+    }
+    return 1;
+}
+
+sub commDelByKeys {
+    my ($sock, @keys) = @_;
+    
+    foreach my $key (@keys) {
+	print $sock "delete $key\r\n";
+	while (<$sock>) {
+	    last if /^DELETED/;
 	}
     }
     return 1;
@@ -64,6 +112,44 @@ sub commDel {
         }
     }
     return 1;
+}
+
+sub commGet {
+    my ($sock, $key) = @_;
+    my $ret = 0;
+    
+    print $sock "get $key\r\n";
+    while (<$sock>){
+	last if /^END/;
+	if (/^VALUE (\S+) (\d+) (\d+)/) {
+	    $ret = 1;
+	}
+    }
+    return $ret;
+}
+
+sub itemExist {
+    my ($sock, $key) = @_;
+    my $ret = 0;
+    
+    print $sock "get $key\r\n";
+    while (<$sock>){
+	last if /^END/;
+	if (/^VALUE (\S+) (\d+) (\d+)/) {
+	    $ret = 1;
+	}
+    }
+    return $ret;
+}
+
+sub printUmemTime {
+    my ($sock) = @_;
+    
+    print $sock "stats umemtime\r\n";
+    while (<$sock>){
+	last if /^END/;
+	print $_;
+    }
 }
 
 sub commFlushAll {

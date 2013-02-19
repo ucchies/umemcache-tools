@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+require "./util.pl";
+
+my $start = shift;
+my $end = shift;
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
+
+die "Could not connect to $host\n" unless $sock;
+
+print "Deleting...\n";
+
+my $key;
+my $key_prefix = 'k';
+for my $n ($start..$end) {
+    $key = ($key_prefix).($n);
+    &commDelByKey($sock, $key);
+}
+
+__END__

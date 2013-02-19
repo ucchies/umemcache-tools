@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+
+use LWP::UserAgent;
+use HTTP::Request;
+use HTTP::Response;
+
+my $pages = shift;
+
+# while(<STDIN>) {
+#     my $count = 0;
+#     if (int(rand(100)) < 30) {
+# 	my @wgetout = `wget -q http://localhost/wiki/index.php/"$_"`;
+# 	foreach my $str (@wgetout) {
+# 	    if ($str =~ /200\ OK/) {
+# 		$count += 1; 
+# 		last;
+# 	    }
+# 	    elsif ($str =~ /404\ Not\ Found/) {
+# 		last;
+# 	    }
+# 	}
+#     }
+#     print $count;
+#     last if ($count >= $pages);
+# }
+
+my $client = new LWP::UserAgent;
+$client->timeout(10);
+$client->agent('Mozilla');
+my $count = 0;
+while (<STDIN>) {
+    if (int(rand(100)) <50) {
+	my $url = 'http://localhost/wiki/index.php/'."$_";
+	#print "$url\n";
+	my $req = HTTP::Request->new(GET => $url);
+	my $res = $client->request($req);
+	if ($res->is_success) {
+	    $count++;
+	    if ($count % 1000 == 0) {
+		print "$count\n";
+		`./slabviewlite -n >> ~/records/umemwiki-2const-sm-"$pages"-1G`;
+	    }
+	}
+	#printf ("%d %d\n",$count,($res->code));
+	last if $count >= $pages;
+    }
+
+}
+
+#`./umemtime >> ~/records/umemwiki-2const-sl-"$pages"-3-time`;
+
+__END__

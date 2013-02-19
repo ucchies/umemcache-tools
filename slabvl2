@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+#use Data::Dumper;
+use Getopt::Long;
+
+require "util.pl";
+
+my $opt_num = 0;
+GetOptions('num' => \$opt_num);
+
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
+
+die "Could not connect to $host\n" unless $sock;
+
+my ($maxid, %classes) = &getAllStatus($sock);
+
+die "No items in $host" unless $maxid;
+
+printf("      ID      FREE/   TOTAL   EVICTED     SPARE     MULTI    FAILED\n") if $opt_num != 0;
+
+for my $n (1..$maxid) {
+    my $cls = $classes{$n};
+    if ($opt_num != 0) {
+	# my $usage_rate = $cls->{mem_requested} / $cls->{chunk_size} * $cls->{total_chunks};
+	printf("Class%3d  %8d /%8d  %8d  %8d  %8d  %8d\n", $n, $cls->{free_chunks}, $cls->{total_chunks}, $cls->{evicted}, $cls->{sparelargered}, $cls->{multiblocked}, $cls->{extraalloc_failed});
+    } else {
+	my $free = 1;
+	$free = $cls->{free_chunks} / $cls->{total_chunks} * 100 unless $cls->{total_chunks} == 0;
+	my $freebar = int($free / 2);
+	$freebar = 50 if $free > 50;
+	my $bar = "";
+	for my $freechar (1..$freebar) {$bar .= "#";}
+	for my $usedchar ($freebar+1..50) {$bar .= "-";}
+	printf("Class%3d  %s  %.1f\n",$n,$bar,$free);
+    }
+}   
+
+
+__END__

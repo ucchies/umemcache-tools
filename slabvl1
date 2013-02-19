@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+#use Data::Dumper;
+
+require "util.pl";
+
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
+
+die "Could not connect to $host\n" unless $sock;
+
+my ($maxid, %classes) = &getStatus($sock);
+
+die "No items in $host" unless $maxid;
+
+for my $n (1..$maxid) {
+    my $cls = $classes{$n};
+    my $used = 1;
+    $used = $cls->{used_chunks} / $cls->{total_chunks} * 100 unless $cls->{total_chunks} == 0;
+    $used = int($used / 2);
+    my $bar = "";
+    for my $barlen (1..$used) {$bar .= "#";}
+    for my $freelen ($used+1..50) {$bar .= "-";}
+    printf("Class%3d  %s\n",$n,$bar);
+}   
+
+
+#         $scr->at($maxid+2, 0)->puts("   Page
+# 	$scr->at($maxid+2+$n, 0)->puts(" $n   $it->{total_pages}  $it->{used_chunks}/$it->{total_chunks}  $it->{free_chunks}");
+#     }
+# #   $scr->at($maxid+10, 0);
+#     $key = $scr->getch() if $scr->key_pressed(1);
+# #   $cnt .= '@';
+# #   $scr->at($maxid+8, 0)->puts("$cnt");
+# }
+# $scr->clrscr();
+
+__END__

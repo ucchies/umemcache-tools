@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+
+require "./util.pl";
+
+my $seq_begin = shift || "1";
+my $seq_end = shift|| "10000";
+my $host = shift || "localhost";
+my $port = shift || "11211";
+my $sock = &getSocket("$host:$port");
+
+die "Could not connect to $host\n" unless $sock;
+
+print "Getting...\n";
+
+my $key_prefix = 'k';
+for my $m ($seq_begin..$seq_end) {
+    my $key = ($key_prefix).($m);
+    my $exist = &itemExist($sock, $key);
+    print "No exist item : $key\n" if $exist == 0;
+}
+
+__END__

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+EXTRA=$1
+
+cd ~/umemcache-tools
+sed -e "s/500000/251206/g" sparetest |perl
+
+if [ $EXTRA -gt 0 ]; then
+./sets 10 1000001 $(expr 1000000 + $EXTRA)
+fi

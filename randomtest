@@ -16,23 +16,30 @@ die "Could not connect to $host\n" unless $sock;
 # &commFlushAll($sock);
 # sleep 5;
 
-print "Setting...\n";
+# print "Setting...\n";
 
 my $key_prefix = 's';
 my $size = 30;
-for my $n (1..200) {
-    my $key = ($key_prefix).($n);
-    my $res = &commSet($sock, $key, $size, 0);
-    last if ($res == 0);
-    $size = int($size * 1.25);
-}
+# for my $n (1..200) {
+#     my $key = ($key_prefix).($n);
+#     my $res = &commSet($sock, $key, $size, 0);
+#     last if ($res == 0);
+#     $size = int($size * 1.25);
+# }
+
+# my ($maxid, %classes) = &getStatus($sock);
 
 print "Testing...\n";
 
 $key_prefix = 'k';
 for my $m (1..500000) {
+    #my $clsid = int(rand($maxid) + 1);
     my $key = ($key_prefix).($m);
-    &commSet($sock, $key, 10, 0);
+    $size = int(rand(1024 * 1024));
+    # for my $i (1..$clsid) {
+    # 	$size = int($size * 1.25);
+    # }
+    &commSet($sock, $key, $size, 0);
 }
 
 __END__
