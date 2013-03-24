@@ -4,48 +4,51 @@ use LWP::UserAgent;
 use HTTP::Request;
 use HTTP::Response;
 
+my $mode = shift;
+my $memsize = shift;
 my $pages = shift;
+my $exp_num = shift || 1;
+die "Usage: wikitest <Mode> <MemSize> <Pages> [Number]" unless ($mode && $memsize && $pages);
 
-# while(<STDIN>) {
-#     my $count = 0;
-#     if (int(rand(100)) < 30) {
-# 	my @wgetout = `wget -q http://localhost/wiki/index.php/"$_"`;
-# 	foreach my $str (@wgetout) {
-# 	    if ($str =~ /200\ OK/) {
-# 		$count += 1; 
-# 		last;
-# 	    }
-# 	    elsif ($str =~ /404\ Not\ Found/) {
-# 		last;
-# 	    }
-# 	}
-#     }
-#     print $count;
-#     last if ($count >= $pages);
-# }
+my $log_name = "wikitest-$mode-$pages-$memsize-$exp_num";
+my $log_interval = $pages / 100;
+my @titles;
+my $maxpage;
+
+chomp(@titles = <STDIN>);
+$maxpage = @titles;
 
 my $client = new LWP::UserAgent;
 $client->timeout(10);
 $client->agent('Mozilla');
-my $count = 0;
-while (<STDIN>) {
-    if (int(rand(100)) <50) {
-	my $url = 'http://localhost/wiki/index.php/'."$_";
-	#print "$url\n";
-	my $req = HTTP::Request->new(GET => $url);
-	my $res = $client->request($req);
-	if ($res->is_success) {
-	    $count++;
-	    if ($count % 1000 == 0) {
-		print "$count\n";
-		`./slabviewlite -n >> ~/records/umemwiki-2const-sm-"$pages"-1G`;
-	    }
+my $count_req = 0;
+my $count_suc = 0;
+my $req_time = 0;
+my $start_time = time();
+while ($count_suc < $pages) {
+    my $title = $titles[int(rand($maxpage))];
+    my $url = 'http://localhost/wiki/index.php/'."$title";
+    #print "$url\n";
+    my $req = HTTP::Request->new(GET => $url);
+    my $start_req_time = time();
+    my $res = $client->request($req);
+    my $end_req_time = time();
+    $count_req++;
+    if ($res->is_success) {
+	$count_suc++;
+	$req_time = $req_time + ($end_req_time - $start_req_time);
+	if ($count_suc % $log_interval == 0) {
+	    print "$count_suc\n";
+	    `./slabviewlite -n >> ~/records/"$log_name"`;
 	}
-	#printf ("%d %d\n",$count,($res->code));
-	last if $count >= $pages;
     }
-
+    #printf ("%d %d\n",$count,($res->code));
 }
+my $end_time = time();
+my $time = $end_time - $start_time;
+`echo $time >> ~/records/"$log_name"-time`;
+`echo $req_time >> ~/records/"$log_name"-reqtime`;
+`echo $count_req >> ~/records/"$log_name"-countreq`;
 
 #`./umemtime >> ~/records/umemwiki-2const-sl-"$pages"-3-time`;
 
